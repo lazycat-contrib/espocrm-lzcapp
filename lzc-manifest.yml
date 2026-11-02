@@ -6,7 +6,6 @@ application:
       backend: file:///lzcapp/pkg/content/licenses/
     - location: /
       backend: http://espocrm:80/
-
 services:
   db:
     image: docker.1ms.run/library/mariadb:10.11
@@ -26,10 +25,9 @@ services:
       start_period: 30s
     binds:
       - /lzcapp/var/db:/var/lib/mysql
-
   espocrm:
-    # upstream: espocrm/espocrm:7.5.1
-    image: docker.1ms.run/espocrm/espocrm:7.5.1
+    # upstream: espocrm/espocrm:10.0.11
+    image: docker.1ms.run/espocrm/espocrm:10.0.11
     depends_on:
       - db
     environment:
@@ -49,7 +47,6 @@ services:
       - TZ=Asia/Shanghai
     binds:
       - /lzcapp/var/data:/var/www/html/data
-
 usage: |
   EspoCRM 是客户关系管理系统：管理联系人、公司、销售线索和商机，跟踪跟进记录。
 

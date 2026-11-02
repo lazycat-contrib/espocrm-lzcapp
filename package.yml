@@ -1,6 +1,6 @@
 package: community.lazycat.app.espocrm
 name: EspoCRM
-version: 0.0.0
+version: 10.0.11
 description: "Customer relationship management with contacts, accounts, leads, opportunities and email integration."
 min_os_version: "1.5.0"
 homepage: https://github.com/espocrm/espocrm
