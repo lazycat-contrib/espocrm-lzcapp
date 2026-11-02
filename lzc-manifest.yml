@@ -1,0 +1,71 @@
+application:
+  subdomain: espocrm
+  multi_instance: false
+  upstreams:
+    - location: /package-licenses/
+      backend: file:///lzcapp/pkg/content/licenses/
+    - location: /
+      backend: http://espocrm:80/
+
+services:
+  db:
+    image: docker.1ms.run/library/mariadb:10.11
+    environment:
+      - MARIADB_ROOT_PASSWORD={{ stable_secret "espocrm_db_root" | replace "\r" "" | replace "\n" "" }}
+      - MARIADB_DATABASE=espocrm
+      - MARIADB_USER=espocrm
+      - |-
+        MARIADB_PASSWORD={{ stable_secret "espocrm_db_password" | replace "\r" "" | replace "\n" "" }}
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - mariadb-admin ping -h 127.0.0.1 -u root -p"$$MARIADB_ROOT_PASSWORD"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    binds:
+      - /lzcapp/var/db:/var/lib/mysql
+
+  espocrm:
+    # upstream: espocrm/espocrm:7.5.1
+    image: docker.1ms.run/espocrm/espocrm:7.5.1
+    depends_on:
+      - db
+    environment:
+      - ESPOCRM_DATABASE_PLATFORM=Mysql
+      - ESPOCRM_DATABASE_HOST=db
+      - ESPOCRM_DATABASE_NAME=espocrm
+      - ESPOCRM_DATABASE_USER=espocrm
+      - |-
+        ESPOCRM_DATABASE_PASSWORD={{ stable_secret "espocrm_db_password" | replace "\r" "" | replace "\n" "" }}
+      - ESPOCRM_ADMIN_USERNAME=admin
+      - |-
+        ESPOCRM_ADMIN_PASSWORD={{ stable_secret "espocrm_admin_password" | replace "\r" "" | replace "\n" "" }}
+      - |-
+        ESPOCRM_SITE_URL={{ .S.AppDomain }}
+      - ESPOCRM_CONFIG_DEFAULT_LANGUAGE=zh_CN
+      - ESPOCRM_CONFIG_DEFAULT_TIME_ZONE=Asia/Shanghai
+      - TZ=Asia/Shanghai
+    binds:
+      - /lzcapp/var/data:/var/www/html/data
+
+usage: |
+  EspoCRM 是客户关系管理系统：管理联系人、公司、销售线索和商机，跟踪跟进记录。
+
+  使用方法：
+  1. 打开应用，用用户名 admin 和你安装时生成的密码登录。
+  2. 建公司（Account）和联系人（Contact），再记录销售线索（Lead）和商机（Opportunity）。
+  3. 在每条记录下可以写跟进备注、安排待办，形成完整的客户跟进历史。
+
+  数据与安全：
+  - 数据库在 MariaDB（/lzcapp/var/db），上传的附件与配置在 /lzcapp/var/data。卸载应用会一并删除，请定期备份。
+  - 数据库密码、管理员密码均由平台稳定密钥生成，每个部署不同，不存在内置弱口令。
+  - 管理员账号名固定为 admin；密码只在首次启动初始化时写入，之后改密码在应用内操作。
+  - 应用经懒猫入口鉴权访问。
+
+  说明：
+  - 本应用包含两个容器（应用本体 + MariaDB），启动顺序由依赖关系保证。
+  - 未配置邮件服务，收发邮件、找回密码等依赖邮件的功能不可用。
+  - 未启用 WebSocket 实时推送（需要额外的 websocket 容器），前台不影响主要功能。
+  - 未做真机验证：登录、建客户与商机、跟进记录以及重启后持久化均未在设备上实测。

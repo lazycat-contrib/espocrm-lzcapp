@@ -1,0 +1,18 @@
+package: community.lazycat.app.espocrm
+name: EspoCRM
+version: 0.0.0
+description: "Customer relationship management with contacts, accounts, leads, opportunities and email integration."
+min_os_version: "1.5.0"
+homepage: https://github.com/espocrm/espocrm
+author: EspoCRM
+license: AGPL-3.0
+permissions:
+  required:
+    - net.internet
+locales:
+  zh:
+    name: EspoCRM
+    description: "客户关系管理：管理联系人、公司、销售线索和商机，跟踪跟进记录，适合小团队做销售管理。"
+  en:
+    name: EspoCRM
+    description: "Customer relationship management with contacts, accounts, leads, opportunities and email integration."
